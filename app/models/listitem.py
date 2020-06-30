@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy import Integer, String, Boolean
 from sqlalchemy.orm import relationship
 
-from models.base import Base
+from app.models.base import Base
 
 
 class ListItem(Base):

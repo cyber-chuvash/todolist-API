@@ -1,10 +1,7 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 
-from .base import Base
-from .user import User
-from .todolist import List
-from .listitem import ListItem
+from app.models.base import Base
 
 engine = create_engine('sqlite:///:memory:', echo=True)
 Session = sessionmaker(bind=engine)
