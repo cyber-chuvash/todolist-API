@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+
+  Swagger-UI:
+    image: swaggerapi/swagger-ui:v3.25.0
+    restart: unless-stopped
+    hostname: api-spec-swagger
+    environment:
+      SWAGGER_JSON: /swagger/todolist-API-swagger.yml
+    volumes:
+      - ".:/swagger"
+    ports:
+      - "127.0.0.1:8220:8080"

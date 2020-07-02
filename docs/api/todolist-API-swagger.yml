@@ -1,0 +1,474 @@
+swagger: "2.0"
+
+info:
+  title: "TODO-list API"
+  description: "This is a simple API for a TODO-list app"
+  version: "0.1.0"
+  contact:
+    name: Mikhail Migushov
+    email: "m.migushov@gmail.com"
+  license:
+    name: "MIT license"
+    url: "https://github.com/cyber-chuvash/todolist-API/blob/master/LICENSE"
+
+host: "api.todo.chuvash.pw"
+
+tags:
+  - name: "users"
+    description: "Access to user info"
+  - name: "lists"
+    description: "Operations with TODO lists"
+  - name: "cards"
+    description: "Operations with cards in TODO lists"
+  - name: "account"
+    description: "Operations with user accounts"
+
+schemes:
+  - "https"
+
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+
+paths:
+  /users/{user_id}:
+    get:
+      tags:
+        - users
+      summary: "Get info about user"
+      description: "Return info about the user"
+      parameters:
+        - $ref: "#/definitions/userIdParam"
+      responses:
+        200:
+          description: "User was found"
+          schema:
+            $ref: "#/definitions/User"
+        404:
+          description: "User not found"
+
+  /lists/:
+    get:
+      tags:
+        - lists
+      summary: "Get an array of available TODO-lists"
+      description: "Return a paginated view on TODO-lists available to the user"
+      parameters:
+        - $ref: "#/definitions/limitParam"
+        - $ref: "#/definitions/offsetParam"
+        - name: include_cards
+          description: "Whether to include an array of cards associated with the lists"
+          in: query
+          type: boolean
+          default: false
+          required: false
+      responses:
+        200:
+          description: "Success (array MAY be empty).
+                        If include_cards parameter is set to true,
+                        there will also be an array of cards for each list (see [GET /lists/<list_id>](#/lists/get_lists__list_id_))."
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/TodoList"
+
+    post:
+      tags:
+        - lists
+      summary: "Create a new TODO-list"
+      description: "Create a new TODO-list for the user"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: "Body describes a new TODO-list object"
+          schema:
+            $ref: "#/definitions/NewTodoList"
+      responses:
+        200:
+          description: "Successfully created a list"
+          schema:
+            $ref: "#/definitions/TodoList"
+        401:
+          description: "You don't have access to create lists for this user"
+
+  /lists/{list_id}:
+    get:
+      tags:
+        - lists
+      summary: "Get info about a TODO-list"
+      description: "Return info about the list and it's cards"
+      parameters:
+        - name: list_id
+          in: path
+          required: true
+          description: "ID of the list"
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        200:
+          description: "Found the list"
+          schema:
+            $ref: "#/definitions/VerboseTodoList"
+        404:
+          description: "List not found"
+        401:
+          description: "You don't have access to this list"
+
+    patch:
+      tags:
+        - lists
+      summary: "Update a TODO-list"
+      description: "Update info about a TODO-list"
+      parameters:
+        - name: list_id
+          in: path
+          required: true
+          description: "ID of the list"
+          type: integer
+          format: int64
+          minimum: 1
+        - name: body
+          in: body
+          required: true
+          description: "Fields from a TODO-list object that need to be updated with new values."
+          schema:
+            allOf:
+              - $ref: "#/definitions/NewTodoList"
+              - required: null
+                description: null
+      responses:
+        200:
+          description: "Updated the list"
+          schema:
+            allOf:
+              - $ref: "#/definitions/TodoList"
+              - description: "Updated list"
+        404:
+          description: "List not found"
+        401:
+          description: "You don't have access to this list"
+
+    delete:
+      tags:
+        - lists
+      summary: "Delete a TODO-list"
+      description: "Delete an entire TODO-list, including all it's cards"
+      parameters:
+        - name: list_id
+          in: path
+          required: true
+          description: "ID of the list"
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        200:
+          description: "Successfully deleted the list"
+        404:
+          description: "List not found"
+        401:
+          description: "You don't have access to this list"
+
+  /lists/{list_id}/cards/:
+    post:
+      tags:
+        - cards
+      summary: "Create a new card in a list"
+      description: "Create a new card in a list"
+      parameters:
+        - name: list_id
+          in: path
+          required: true
+          description: "ID of the list"
+          type: integer
+          format: int64
+          minimum: 1
+        - name: body
+          in: body
+          required: true
+          description: "Body describes a new card object"
+          schema:
+            $ref: "#/definitions/NewCard"
+      responses:
+        200:
+          description: "Successfully created a card"
+          schema:
+            $ref: "#/definitions/Card"
+        401:
+          description: "You don't have access to create cards in this list"
+        404:
+          description: "List not found"
+
+  /lists/{list_id}/cards/{card_id}:
+    get:
+      summary: "Get a single card info"
+      tags:
+        - cards
+      parameters:
+        - name: list_id
+          in: path
+          required: true
+          description: "ID of the list"
+          type: integer
+          format: int64
+          minimum: 1
+        - name: card_id
+          in: path
+          required: true
+          description: "ID of the card"
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        200:
+          description: "Info about a card"
+          schema:
+            $ref: "#/definitions/Card"
+        404:
+          description: "List or card are not found"
+        401:
+          description: "You don't have access to cards in this list"
+
+    patch:
+      tags:
+        - cards
+      summary: "Update a card"
+      description: "Update a card"
+      parameters:
+        - name: list_id
+          in: path
+          required: true
+          description: "ID of the list"
+          type: integer
+          format: int64
+          minimum: 1
+        - name: card_id
+          in: path
+          required: true
+          description: "ID of the card"
+          type: integer
+          format: int64
+          minimum: 1
+        - name: body
+          in: body
+          required: true
+          description: "Fields from a card object that need to be updated with new values."
+          schema:
+            allOf:
+              - $ref: "#/definitions/NewCard"
+              - required: null
+                description: ""
+      responses:
+        200:
+          description: "Successfully updated the card"
+          schema:
+            $ref: '#/definitions/Card'
+        404:
+          description: "List or card are not found"
+        401:
+          description: "You don't have access to update cards in this list"
+
+    delete:
+      summary: "Delete a card"
+      tags:
+        - cards
+      parameters:
+        - name: list_id
+          in: path
+          required: true
+          description: "ID of the list"
+          type: integer
+          format: int64
+          minimum: 1
+        - name: card_id
+          in: path
+          required: true
+          description: "ID of the card"
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        200:
+          description: "Successfully deleted the card"
+        404:
+          description: "List or card are not found"
+        401:
+          description: "You don't have access to delete cards from this list"
+
+  /account/:
+    get:
+      summary: "Get current user's account"
+      tags:
+        - account
+      responses:
+        200:
+          description: "Returned info about current user's account"
+          schema:
+            $ref: "#/definitions/Account"
+        401:
+          description: "Login required"
+
+    post:
+      summary: "Create a new account"
+      description: "Register a new user account"
+      tags:
+        - account
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/NewAccount"
+      responses:
+        200:
+          description: "Successfully created a new user account"
+          schema:
+            $ref: "#/definitions/Account"
+
+    delete:
+      summary: "Delete current user's account"
+      description: "Completely delete current users account with all of the lists associated with it.
+                    \n\n ### *THIS ACTION IS IRREVERSIBLE.*"
+      tags:
+        - account
+      responses:
+        200:
+          description: "The account was successfully deleted"
+
+
+securityDefinitions:
+  api_key:
+    description: "Until auth flow is created, the value for this token == user_id"
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+
+
+definitions:
+  _BaseUser:
+    type: object
+    description: "Base user object, for inheritance only"
+    required:
+      - username
+    properties:
+      username:
+        type: string
+
+  User:
+    allOf:
+      - $ref: "#/definitions/_BaseUser"
+      - description: "User object, as seen by other users"
+        required:
+          - id
+        properties:
+          id:
+            $ref: "#/definitions/genericId"
+
+  NewAccount:
+    allOf:
+      - $ref: "#/definitions/_BaseUser"
+      - description: "A new account object"
+        required:
+          - email
+        properties:
+          email:
+            type: string
+
+  Account:
+    allOf:
+      - $ref: "#/definitions/User"
+      - $ref: "#/definitions/NewAccount"
+      - description: "User account object"
+
+  NewTodoList:
+    type: object
+    description: "A new TODO-list object"
+    required:
+      - title
+    properties:
+      title:
+        type: string
+
+  TodoList:
+    allOf:
+      - $ref: "#/definitions/NewTodoList"
+      - description: "A TODO-list object"
+        required:
+          - id
+        properties:
+          id:
+            $ref: "#/definitions/genericId"
+
+  VerboseTodoList:
+    allOf:
+      - $ref: "#/definitions/TodoList"
+      - description: "A TODO-list object with it's cards"
+        required:
+          - cards
+        properties:
+          cards:
+            type: array
+            items:
+              $ref: "#/definitions/Card"
+
+  NewCard:
+    type: object
+    description: "A new card in a TODO-list"
+    required:
+      - text
+    properties:
+      text:
+        type: string
+      description:
+        type: string
+      is_done:
+        type: boolean
+        default: false
+
+  Card:
+    allOf:
+      - $ref: "#/definitions/NewCard"
+      - description: "A card in a TODO-list"
+        required:
+          - id
+        properties:
+          id:
+            $ref: "#/definitions/genericId"
+
+
+  genericId:
+    type: integer
+    format: int64
+    minimum: 1
+
+  userIdParam:
+    allOf:
+      - $ref: "#/definitions/genericId"
+      - in: path
+        name: user_id
+        description: "The ID of the user to perform the action on"
+        type: integer
+        minimum: 1
+        required: true
+
+  limitParam:
+    in: query
+    name: limit
+    description: "A maximum number of objects to return"
+    type: integer
+    minimum: 0
+    default: 20
+    required: false
+
+  offsetParam:
+    in: query
+    name: offset
+    description: "A number of objects to skip over"
+    type: integer
+    minimum: 0
+    default: 0
+    required: false
