@@ -1,7 +1,8 @@
 from flask import Flask
 
 from app import db
-from app.routes import users
+from app.routes.users import UserAPI
+from app.routes.account import AccountAPI
 
 
 def register_route(app, view, endpoint, url, pk='id', pk_type='int'):
@@ -24,6 +25,9 @@ def create_app(test_config=None):
     def shutdown_db_session(exc=None):
         db.Session.remove()
 
-    register_route(app, users.UserAPI, 'user_api', '/users/', 'user_id')
+    register_route(app, UserAPI, 'user_api', '/users/', 'user_id')
+
+    account_view = AccountAPI.as_view('account_api')
+    app.add_url_rule('/account/', view_func=account_view, methods=['GET', 'POST', 'DELETE', 'PATCH'])
 
     return app

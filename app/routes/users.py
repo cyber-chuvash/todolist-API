@@ -18,28 +18,4 @@ class UserAPI(MethodView):
             return {'error': 'User not found'}, 404
 
         return flask.jsonify(id=user.id,
-                             name=user.name)
-
-    def post(self):
-        req = flask.request
-        data = req.get_json(silent=True)
-        if data is None:
-            return {'error': 'Only JSON data is supported'}, 400
-
-        if not ('name' in data):
-            return {'error': 'name is required'}, 400
-
-        # TODO additional checks of course
-
-        s = db.Session()
-        new_user = User(name=data['name'])
-        s.add(new_user)
-        s.commit()
-
-        return {'id': new_user.id}
-
-    def delete(self, user_id):
-        raise NotImplementedError
-
-    def put(self, user_id):
-        raise NotImplementedError
+                             username=user.username)
