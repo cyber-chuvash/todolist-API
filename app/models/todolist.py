@@ -10,8 +10,8 @@ class List(Base):
 
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
-    owner_id = Column(Integer, ForeignKey('users.id'))
+    owner_id = Column(Integer, ForeignKey('users.id'), index=True)
 
     owner = relationship('User', back_populates='lists')
-    cards = relationship('Card', back_populates='list')
+    cards = relationship('Card', back_populates='list', cascade='all, delete-orphan')
 

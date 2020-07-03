@@ -9,7 +9,7 @@ class Card(Base):
     __tablename__ = 'cards'
 
     id = Column(Integer, primary_key=True)
-    list_id = Column(Integer, ForeignKey('lists.id'))
+    list_id = Column(Integer, ForeignKey('lists.id'), index=True)
 
     text = Column(String, nullable=False)
     description = Column(String)

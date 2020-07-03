@@ -10,6 +10,6 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     username = Column(String, nullable=False)
-    email = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True, index=True)
 
-    lists = relationship('List', back_populates='owner')
+    lists = relationship('List', back_populates='owner', cascade='all, delete-orphan')
