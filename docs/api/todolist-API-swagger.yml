@@ -328,6 +328,8 @@ paths:
           description: "Successfully created a new user account"
           schema:
             $ref: "#/definitions/Account"
+        409:
+          description: "User with this email already exists"
 
     delete:
       summary: "Delete current user's account"
