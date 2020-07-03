@@ -13,5 +13,5 @@ class List(Base):
     owner_id = Column(Integer, ForeignKey('users.id'))
 
     owner = relationship('User', back_populates='lists')
-    items = relationship('ListItem', back_populates='list')
+    cards = relationship('Card', back_populates='list')
 

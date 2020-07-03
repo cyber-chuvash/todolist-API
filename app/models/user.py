@@ -9,6 +9,7 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    username = Column(String, nullable=False)
+    email = Column(String, nullable=False)
 
     lists = relationship('List', back_populates='owner')
