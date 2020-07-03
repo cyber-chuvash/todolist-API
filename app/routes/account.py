@@ -1,23 +1,35 @@
 import flask
+from flask import g
 from flask.views import MethodView
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import NoResultFound
 
 from app import db
 from app.models.user import User
+from app.auth import auth_required
 
 
 class AccountAPI(MethodView):
+    @auth_required
     def get(self):
         """
         Get current user's account
-        Will be implemented after some basic auth is made
 
         :return: HTTP 200: User account info
-        :return: HTTP 401: Login required
 
         https://docs.todo.chuvash.pw/#/account/get_account_
         """
-        raise NotImplementedError
+        s = db.Session()
+        try:
+            account = s.query(User).filter_by(id=g.auth['user_id']).one()
+        except NoResultFound:
+            return {'error': 'Account not found'}, 404
+
+        return {
+            'id': account.id,
+            'username': account.username,
+            'email': account.email
+        }
 
     def post(self):
         """
@@ -51,6 +63,7 @@ class AccountAPI(MethodView):
             email=new_user.email
         )
 
+    @auth_required
     def delete(self):
         """
         Completely delete current users account with all of the lists associated with it.
@@ -59,4 +72,14 @@ class AccountAPI(MethodView):
 
         https://docs.todo.chuvash.pw/#/account/delete_account_
         """
-        raise NotImplementedError
+
+        s = db.Session()
+        try:
+            account_to_delete = s.query(User).filter_by(id=g.auth['user_id']).one()
+            s.delete(account_to_delete)
+            s.commit()
+        except NoResultFound:
+            return {'error': "Account was already deleted"}, 404
+
+        return 'ok', 200
+
