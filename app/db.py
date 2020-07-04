@@ -3,7 +3,12 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 
 from app.models import Base
 
-engine = create_engine('sqlite:///tmp/db.sqlite', echo=True)
-Session = scoped_session(sessionmaker(bind=engine))
+Session = None
 
-Base.metadata.create_all(engine)
+
+def init_db(app):
+    global Session
+    engine = create_engine(app.config['DB_CONNECT_URL'], echo=app.config.get('DB_ECHO', False))
+    Session = scoped_session(sessionmaker(bind=engine))
+
+    Base.metadata.create_all(engine)

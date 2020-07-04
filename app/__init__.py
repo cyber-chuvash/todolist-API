@@ -1,8 +1,28 @@
+import os
+
 from flask import Flask
 
 from app import db
 from app.routes.users import UserAPI
 from app.routes.account import AccountAPI
+
+
+envs = {
+    "dev": "../configs/dev.py",
+    "test": "../configs/test.py",
+    "prod": "ENVIRON"
+}
+
+
+def configure(app):
+    env = os.environ.get('TODOLIST_APP_ENV', None)
+    if env not in envs.keys():
+        raise ValueError(f'TODOLIST_APP_ENV env var MUST be set to one of {", ".join(envs.keys())}')
+
+    if envs[env] == 'ENVIRON':
+        app.config.from_envvar("TODOLIST_APP_CONFIG_FILE")
+    else:
+        app.config.from_pyfile(envs[env])
 
 
 def register_route(app, view, endpoint, url, pk='id', pk_type='int'):
@@ -14,12 +34,10 @@ def register_route(app, view, endpoint, url, pk='id', pk_type='int'):
                      methods=['GET', 'PUT', 'DELETE'])
 
 
-def create_app(test_config=None):
+def create_app():
     app = Flask(__name__)
-    app.config.from_mapping(SECRET_KEY='dev')
-
-    if test_config is not None:
-        app.config.from_mapping(test_config)
+    configure(app)
+    db.init_db(app)
 
     @app.teardown_appcontext
     def shutdown_db_session(exc=None):
