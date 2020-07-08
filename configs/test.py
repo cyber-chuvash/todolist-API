@@ -1,4 +1,6 @@
+import tempfile
+
 TESTING = True
 
-DB_CONNECT_URL = "sqlite:///tmp/test_db.sqlite"
+DB_CONNECT_URL = "sqlite:///" + tempfile.NamedTemporaryFile(suffix='.sqlite').name
 DB_ECHO = False
