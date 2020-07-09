@@ -61,3 +61,19 @@ def user_account(flask_client):
     acc.register()
 
     return acc
+
+
+@pytest.fixture
+def get_user_with_lists(flask_client, user_account):
+    def create_user_lists(n):
+        todo_lists = [{'title': ''.join(random.choices(string.ascii_lowercase, k=8))} for _ in range(n)]
+
+        created_lists = []
+        for lst in todo_lists:
+            res = flask_client.post('/lists/', json=lst, headers=[user_account.auth_header])
+            assert res.status_code == 200
+            created_lists.append(res.get_json())
+
+        user_account.lists = created_lists
+        return user_account
+    return create_user_lists
