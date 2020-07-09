@@ -109,6 +109,65 @@ def test_get_lists_include_cards(flask_client, get_user_with_lists):
     assert isinstance(data[0].get('cards'), list)
 
 
+def test_get_lists_bigger_limit_than_num_of_lists(flask_client, get_user_with_lists):
+    user = get_user_with_lists(5)
+    res = flask_client.get('/lists/',
+                           headers=[user.auth_header],
+                           query_string={
+                               "limit": 10
+                           })
+    assert res.status_code == 200
+
+    data = res.get_json()
+    assert isinstance(data, list)
+    assert len(data) == 5
+
+
+def test_get_lists_negative_limit(flask_client, get_user_with_lists):
+    user = get_user_with_lists(1)
+    res = flask_client.get('/lists/',
+                           headers=[user.auth_header],
+                           query_string={
+                               "limit": -1
+                           })
+    assert res.status_code == 400
+    data = res.get_json()
+    assert data is not None
+    assert data.get('error') is not None
+    assert "limit" in data['error']
+    assert "0" in data['error']
+
+
+def test_get_lists_huge_limit(flask_client, get_user_with_lists):
+    user = get_user_with_lists(1)
+    res = flask_client.get('/lists/',
+                           headers=[user.auth_header],
+                           query_string={
+                               "limit": 99999
+                           })
+    assert res.status_code == 400
+    data = res.get_json()
+    assert data is not None
+    assert data.get('error') is not None
+    assert "limit" in data['error']
+    assert "100" in data['error']
+
+
+def test_get_lists_negative_offset(flask_client, get_user_with_lists):
+    user = get_user_with_lists(1)
+    res = flask_client.get('/lists/',
+                           headers=[user.auth_header],
+                           query_string={
+                               "offset": -1
+                           })
+    assert res.status_code == 400
+    data = res.get_json()
+    assert data is not None
+    assert data.get('error') is not None
+    assert "offset" in data['error']
+    assert "0" in data['error']
+
+
 def test_get_lists_nonexistent_user(flask_client):
     res = flask_client.get('/lists/', headers=[('Authorization', 'Bearer 1337322696969')])
     assert res.status_code == 200
