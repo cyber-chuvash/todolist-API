@@ -4,6 +4,7 @@ from flask import Flask
 
 from app import db
 from app.routes.users import UserAPI
+from app.routes.lists import ListAPI
 from app.routes.account import AccountAPI
 
 
@@ -67,6 +68,7 @@ def create_app():
         db.Session.remove()
 
     register_route(app, UserAPI, '/users/', key='user_id')
+    register_route(app, ListAPI, '/lists/', key='list_id')
 
     account_view = AccountAPI.as_view('account_api')
     app.add_url_rule('/account/', view_func=account_view, methods=['GET', 'POST', 'DELETE', 'PATCH'])
