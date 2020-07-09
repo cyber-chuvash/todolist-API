@@ -18,6 +18,13 @@ class ListAPI(MethodView):
         pass
 
     def get_all(self):
+        """
+        Get all lists associated with the user
+
+        :return: HTTP 200: Array of user's lists
+
+        https://docs.todo.chuvash.pw/#/lists/get_lists_
+        """
         req = flask.request
         user_id = flask.g.auth['user_id']
 
@@ -43,6 +50,13 @@ class ListAPI(MethodView):
 
     @auth_required
     def post(self):
+        """
+        Create a new list
+
+        :return: HTTP 200: Successfully created a new list: New list object
+
+        https://docs.todo.chuvash.pw/#/lists/post_lists_
+        """
         req = flask.request
         data = req.get_json(silent=True)
         if data is None:
