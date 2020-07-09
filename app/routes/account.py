@@ -25,11 +25,7 @@ class AccountAPI(MethodView):
         except NoResultFound:
             return {'error': 'Account not found'}, 404
 
-        return {
-            'id': account.id,
-            'username': account.username,
-            'email': account.email
-        }
+        return account.get_api_repr(include_email=True)
 
     def post(self):
         """
@@ -57,11 +53,7 @@ class AccountAPI(MethodView):
         except IntegrityError:
             return {'error': "User with this email already exists"}, 409
 
-        return flask.jsonify(
-            id=new_user.id,
-            username=new_user.username,
-            email=new_user.email
-        )
+        return new_user.get_api_repr(include_email=True)
 
     @auth_required
     def delete(self):

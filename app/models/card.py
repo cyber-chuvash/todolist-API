@@ -17,3 +17,11 @@ class Card(Base):
 
     list = relationship('List', back_populates='cards')
 
+    def get_api_repr(self):
+        return {
+            "id": self.id,
+            "text": self.text,
+            "description": self.description,
+            "is_done": self.is_done
+        }
+

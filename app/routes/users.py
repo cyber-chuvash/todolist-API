@@ -1,4 +1,3 @@
-import flask
 from flask.views import MethodView
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -17,5 +16,4 @@ class UserAPI(MethodView):
         except NoResultFound:
             return {'error': 'User not found'}, 404
 
-        return flask.jsonify(id=user.id,
-                             username=user.username)
+        return user.get_api_repr(include_email=False)

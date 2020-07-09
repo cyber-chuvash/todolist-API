@@ -15,3 +15,11 @@ class List(Base):
     owner = relationship('User', back_populates='lists')
     cards = relationship('Card', back_populates='list', cascade='all, delete-orphan')
 
+    def get_api_repr(self, include_cards=False):
+        api_repr = {
+            "id": self.id,
+            "title": self.title,
+        }
+        if include_cards:
+            api_repr['cards'] = list(map(lambda card: card.get_api_repr(), self.cards))
+        return api_repr
