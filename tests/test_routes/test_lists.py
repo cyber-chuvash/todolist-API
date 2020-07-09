@@ -59,7 +59,7 @@ def test_get_all_lists_with_offsets(flask_client, get_user_with_lists):
 
     # Get first 2 lists
     first_two = flask_client.get('/lists/',
-                                 headers=user.auth_header,
+                                 headers=[user.auth_header],
                                  query_string={
                                      "limit": 2
                                  })
@@ -68,7 +68,7 @@ def test_get_all_lists_with_offsets(flask_client, get_user_with_lists):
 
     # Get the third list
     third = flask_client.get('/lists/',
-                             headers=user.auth_header,
+                             headers=[user.auth_header],
                              query_string={
                                  "offset": 2,
                                  "limit": 1
@@ -78,10 +78,10 @@ def test_get_all_lists_with_offsets(flask_client, get_user_with_lists):
 
     # Get the fourth and fifth lists
     last_two = flask_client.get('/lists/',
-                                headers=user.auth_header,
+                                headers=[user.auth_header],
                                 query_string={
-                                    "offset": 2,
-                                    "limit": 1
+                                    "offset": 3,
+                                    "limit": 2
                                 })
     assert last_two.status_code == 200
     returned_lists += last_two.get_json()
@@ -94,7 +94,7 @@ def test_get_all_lists_with_offsets(flask_client, get_user_with_lists):
 def test_get_lists_include_cards(flask_client, get_user_with_lists):
     user = get_user_with_lists(3)
     res = flask_client.get('/lists/',
-                           headers=user.auth_header,
+                           headers=[user.auth_header],
                            query_string={
                                "limit": 1,
                                "include_cards": True
@@ -102,16 +102,20 @@ def test_get_lists_include_cards(flask_client, get_user_with_lists):
     assert res.status_code == 200
 
     data = res.get_json()
-    assert data is not None
-    assert data.get('error') is None
-    assert data.get('id') is not None
-    assert data.get('title') is not None
-    assert isinstance(data.get('cards'), list)
+    assert isinstance(data, list)
+    assert len(data) == 1
+    assert data[0].get('id') is not None
+    assert data[0].get('title') is not None
+    assert isinstance(data[0].get('cards'), list)
 
 
 def test_get_lists_nonexistent_user(flask_client):
     res = flask_client.get('/lists/', headers=[('Authorization', 'Bearer 1337322696969')])
-    assert res.status_code == 404
+    assert res.status_code == 200
+
+    data = res.get_json()
+    assert isinstance(data, list)
+    assert len(data) == 0
 
 
 def test_get_lists_no_auth(flask_client):

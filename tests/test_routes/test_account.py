@@ -161,4 +161,7 @@ def test_account_deletes_completely(flask_client, get_user_with_lists):
     assert got_user.status_code == 404
 
     got_lists = flask_client.get('/lists/', headers=[user.auth_header])
-    assert got_lists.status_code == 404
+    assert got_lists.status_code == 200
+    data = got_lists.get_json()
+    assert isinstance(data, list)
+    assert len(data) == 0
