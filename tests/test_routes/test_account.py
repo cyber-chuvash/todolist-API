@@ -149,3 +149,16 @@ def test_repeated_delete_account(flask_client, user_account):
 def test_delete_account_no_auth(flask_client):
     res = flask_client.delete('/account/')
     assert res.status_code == 401
+
+
+def test_account_deletes_completely(flask_client, get_user_with_lists):
+    user = get_user_with_lists(3)
+
+    res = flask_client.delete('/account/', headers=[user.auth_header])
+    assert res.status_code == 200
+
+    got_user = flask_client.get(f'/users/{user.id}')
+    assert got_user.status_code == 404
+
+    got_lists = flask_client.get('/lists/', headers=[user.auth_header])
+    assert got_lists.status_code == 404
